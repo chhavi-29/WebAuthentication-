@@ -2,48 +2,82 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-       <title> Profile</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
 </head>
 <body>
     <h1>Profile Page</h1>
-        <button id="register-passkey-btn">Register Passkey</button>
-      <script src="https://unpkg.com/@simplewebauthn/browser/dist/bundle/index.umd.min.js"></script>
+    <p id="welcome"></p>
 
-      <script>
-      const registerPasskeyBtn = document.getElementById('register-passkey-btn');
-      registerPasskeyBtn.addEventListener('click', async () => {
-           const url = new URL(window.location)
+    <button id="register-passkey-btn">Register Passkey</button>
+    <button id="logout-btn">Log out</button>
 
-         const userId = url.searchParams.get('userId')
+    <script src="https://unpkg.com/@simplewebauthn/browser/dist/bundle/index.umd.min.js"></script>
 
+    <script>
+        // 1. Ask the server who is logged in
+        fetch('/me')
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    window.location.replace('/login.html')
+                    return
+                }
+                document.getElementById('welcome').textContent = 'Hello, ' + data.username
+            })
+
+        // 2. Log out button
+        document.getElementById('logout-btn').addEventListener('click', async () => {
+            await fetch('/logout', { method: 'POST' })
+            window.location.replace('/login.html')
+        })
+
+        // 3. Register Passkey button
+        const registerPasskeyBtn = document.getElementById('register-passkey-btn');
+
+        registerPasskeyBtn.addEventListener('click', async () => {
             const response = await fetch('/register-challenge', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ userId })
+                body: JSON.stringify({})
             })
 
+            const challengeResult = await response.json()
 
+            if (!response.ok) {
+                alert(challengeResult.error || 'Something went wrong')
+                return
+            }
 
-        const challengeResult = await response.json()
             const { options } = challengeResult // Server side challenge
 
-            const authenticationResult = await SimpleWebAuthnBrowser.startRegistration({ optionsJSON: options })
-            console.log(authenticationResult)
+            let authenticationResult
+            try {
+                authenticationResult = await SimpleWebAuthnBrowser.startRegistration({ optionsJSON: options })
+            } catch (error) {
+                console.log(error)
+                alert('Passkey registration was cancelled or failed')
+                return
+            }
 
-            await fetch('/register-verify', {
+            const verifyResponse = await fetch('/register-verify', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ userId, cred: authenticationResult })
+                body: JSON.stringify({ cred: authenticationResult })
             })
 
+            const verifyResult = await verifyResponse.json()
+
+            if (verifyResult.verified) {
+                alert('Passkey registered!')
+            } else {
+                alert('Passkey registration failed')
+            }
         })
-
-      </script>
-    </body> 
-
+    </script>
+</body>
 </html>

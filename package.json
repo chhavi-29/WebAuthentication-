@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+      "start": "node index.js",
     "dev": "nodemon index.js"
   },
   "keywords": [],
@@ -14,7 +15,20 @@
     "nodemon": "^3.1.14"
   },
   "dependencies": {
-    "@simplewebauthn/server": "^14.0.2",
-    "express": "^5.2.1"
-  }
+    "@simplewebauthn/server": "^14.0.3",
+    "bcryptjs": "^3.0.3",
+    "connect-mongo": "^5.1.0",
+    "dotenv": "^18.0.6",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "mongodb": "^6.21.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chhavi-29/WebAuthentication-.git"
+  },
+  "bugs": {
+    "url": "https://github.com/chhavi-29/WebAuthentication-/issues"
+  },
+  "homepage": "https://github.com/chhavi-29/WebAuthentication-#readme"
 }

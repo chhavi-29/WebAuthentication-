@@ -2,26 +2,26 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>signup</title>
 </head>
 <body>
-    
-    <form id = "registerForm">
-        <input type="text"  placeholder="Username"  id = "username">
-        <input type="password" placeholder="Password" id = "password">
+
+    <form id="registerForm">
+        <input type="text" placeholder="Username" id="username">
+        <input type="password" placeholder="Password" id="password">
         <button type="submit">Sign Up</button>
     </form>
 
-    <script >
+    <script>
         const form = document.getElementById('registerForm');
 
         const usernameField = document.getElementById('username');
-         const passwordField = document.getElementById('password');
-        
+        const passwordField = document.getElementById('password');
+
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
-            const response = await fetch('/register' ,{
+            const response = await fetch('/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -31,13 +31,16 @@
                     password: passwordField.value
                 })
             })
+
             const result = await response.json();
-            const{id}= result;
+            if (!response.ok) {
+                alert(result.error);
+                return;
+            }
+            const { id } = result;
 
-          window.location.replace(`http://localhost:3000/profile.html?userId=${id}`)
-
-                
-            })
-
+            window.location.replace(`/profile.html?userId=${id}`)
+        })
     </script>
+</body>
 </html>

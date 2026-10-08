@@ -7,48 +7,64 @@
 </head>
 <body>
     <form id="login-form">
-        <input type="text" placeholder="userId" id="userId" />
+        <input type="text" placeholder="username" id="username" />
         <button type="submit">Login with Passkey</button>
     </form>
 
     <script src="https://unpkg.com/@simplewebauthn/browser/dist/bundle/index.umd.min.js"></script>
 
-
     <script>
-         const form = document.getElementById('login-form');
+        const form = document.getElementById('login-form');
+        const usernameField = document.getElementById('username');
 
-         const userIdField = document.getElementById('userId')
-
-         form.addEventListener('submit', async e => {
+        form.addEventListener('submit', async e => {
             e.preventDefault()
-            const userId = userIdField.value;
-            
+            const username = usernameField.value;
+
             const response = await fetch('/login-challenge', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ userId })
+                body: JSON.stringify({ username })
             })
-
 
             const challengeResult = await response.json()
 
-            const { options } = challengeResult // Server side challenge
+            if (!response.ok) {
+                alert(challengeResult.error || 'Something went wrong')
+                return
+            }
 
-            const authenticationResult = await SimpleWebAuthnBrowser.startAuthentication(options)
-            
+            const { options } = challengeResult // Server side challenge
+            const userId = challengeResult.userId
+
+            let authenticationResult
+            try {
+                authenticationResult = await SimpleWebAuthnBrowser.startAuthentication({ optionsJSON: options })
+            } catch (error) {
+                alert('Passkey was cancelled or failed')
+                return
+            }
+
             console.log(authenticationResult)
 
-            await fetch('/login-verify', {
+            const verifyResponse = await fetch('/login-verify', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ userId, cred: authenticationResult })
             })
-         })
 
+            const verifyResult = await verifyResponse.json()
+
+            if (verifyResult.success) {
+                    window.location.replace(`/profile.html?userId=${userId}`)
+            } else {
+                alert('Login failed')
+            }
+        })
     </script>
 </body>
 </html>
