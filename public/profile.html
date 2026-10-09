@@ -4,13 +4,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile</title>
+    <style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f4f6fb;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        margin: 0;
+    }
+    h1, p {
+        text-align: center;
+    }
+    .buttons {
+        display: flex;
+        gap: 12px;
+    }
+    button {
+        padding: 10px 20px;
+        background: #4f46e5;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+    #logout-btn {
+        background: #6b7280;
+    }
+</style>
 </head>
 <body>
     <h1>Profile Page</h1>
     <p id="welcome"></p>
 
+   <div class="buttons">
     <button id="register-passkey-btn">Register Passkey</button>
     <button id="logout-btn">Log out</button>
+</div>
 
     <script src="https://unpkg.com/@simplewebauthn/browser/dist/bundle/index.umd.min.js"></script>
 
