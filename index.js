@@ -59,7 +59,15 @@ const challengeStore = {};
 
 // ---------- Sign-up ----------
 app.post('/register', async (req, res) => {
-    const { username, password } = req.body;
+    const username = (req.body.username || '').trim().toLowerCase();
+    const password = req.body.password || '';
+
+    if (!username) {
+        return res.status(400).json({ error: 'Please enter a username' });
+    }
+    if (password.length < 8) {
+        return res.status(400).json({ error: 'Password must be at least 8 characters' });
+    }
 
     const existing = await users.findOne({ username });
     if (existing) {
@@ -146,11 +154,14 @@ app.post('/register-verify', async (req, res) => {
 
 // ---------- Log in with a passkey ----------
 app.post('/login-challenge', async (req, res) => {
-    const { username } = req.body
+    const username = (req.body.username || '').trim().toLowerCase()
 
     const user = await users.findOne({ username })
-    if (!user || !user.passkey) {
-        return res.status(404).json({ error: 'user not found or no passkey registered' })
+    if (!user) {
+        return res.status(404).json({ error: 'User not found' })
+    }
+    if (!user.passkey) {
+        return res.status(400).json({ error: 'This account has no passkey registered yet' })
     }
 
     const opts = await generateAuthenticationOptions({
